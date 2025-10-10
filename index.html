@@ -10,11 +10,77 @@
   <style>
     body {
       font-family: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-      background-image: url('https://images.unsplash.com/photo-1620325867502-2216c5f8a7e8');
+      background-color: #f8f9fa; /* Light background for day mode */
+      color: #212529; /* Dark text for day mode */
+      transition: background-color 0.3s ease, color 0.3s ease;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('https://imgpx.com/en/dES4PG8L57xD.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
-      transition: background-color 0.3s ease, color 0.3s ease;
+      filter: blur(8px); /* Blurry effect for background */
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -2;
+    }
+    body.dark {
+      background-color: transparent; /* Transparent to show blurry background */
+      color: #f8f9fa; /* Light text for dark mode */
+    }
+    body.dark::before {
+      opacity: 1; /* Show blurry background in dark mode */
+    }
+    /* Overlay for better readability in dark mode */
+    body.dark::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay to enhance contrast */
+      z-index: -1;
+      pointer-events: none;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white for day mode cards/content */
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    body.dark .container {
+      background-color: rgba(33, 37, 41, 0.8); /* Semi-transparent dark for dark mode */
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-img {
+      height: 30px;
+      width: auto;
+      transition: opacity 0.3s ease;
+    }
+    body.dark .logo-dark {
+      display: block;
+    }
+    body.dark .logo-light {
+      display: none;
+    }
+    body:not(.dark) .logo-dark {
+      display: none;
+    }
+    body:not(.dark) .logo-light {
+      display: block;
     }
     .ai-indicator {
       display: inline-block;
@@ -58,35 +124,61 @@
       margin-bottom: 0.5rem;
       font-size: 0.8rem;
     }
-    body.dark {
-      background-color: #121212;
-      color: #f8f9fa;
+    /* Day mode overrides */
+    .card {
+      background-color: #fff;
+      border-color: #dee2e6;
     }
-    .dark .card {
+    .text-muted {
+      color: #6c757d !important;
+    }
+    .bg-light {
+      background-color: #f8f9fa !important;
+    }
+    .btn-outline-secondary {
+      border-color: #6c757d;
+      color: #212529;
+    }
+    .form-control {
+      background-color: #fff;
+      border-color: #ced4da;
+      color: #212529;
+    }
+    .form-select {
+      background-color: #fff;
+      border-color: #ced4da;
+      color: #212529;
+    }
+    .suggestion-card {
+      border-left-color: #0d6efd;
+    }
+    /* Dark mode overrides (enhanced for visibility) */
+    body.dark .card {
       background-color: #212529;
       border-color: #343a40;
+      color: #f8f9fa;
     }
-    .dark .text-muted {
+    body.dark .text-muted {
       color: #adb5bd !important;
     }
-    .dark .bg-light {
+    body.dark .bg-light {
       background-color: #343a40 !important;
     }
-    .dark .btn-outline-secondary {
+    body.dark .btn-outline-secondary {
       border-color: #495057;
       color: #f8f9fa;
     }
-    .dark .form-control {
+    body.dark .form-control {
       background-color: #343a40;
       border-color: #495057;
       color: #f8f9fa;
     }
-    .dark .form-select {
+    body.dark .form-select {
       background-color: #343a40;
       border-color: #495057;
       color: #f8f9fa;
     }
-    .dark .suggestion-card {
+    body.dark .suggestion-card {
       border-left-color: #60a5fa;
     }
   </style>
@@ -95,9 +187,13 @@
   <div class="container my-5">
     <!-- Header -->
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3">Trading AI </h1>
-        <p class="text-muted small">H&W Invest Intelectual Property</p>
+      <div class="logo-container">
+        <img src="https://hw-invest.pro/wp-content/uploads/2025/05/HW-Invest-Logo-light.png" alt="H&W Invest Logo" class="logo-img logo-dark">
+        <img src="https://imgpx.com/en/O1MK1n6WQTjC.jpg" alt="H&W Invest Logo" class="logo-img logo-light">
+        <div>
+          <h1 class="h3 mb-1">Trading AI</h1>
+          <p class="text-muted small mb-0">H&W Invest Intellectual Property</p>
+        </div>
       </div>
       <div class="d-flex align-items-center mt-3 mt-sm-0">
         <button id="toggleMode" class="btn btn-sm btn-outline-secondary">Switch to Day Mode</button>
@@ -110,7 +206,7 @@
         <h2 class="h5 d-flex align-items-center">
           AI Mode <span class="ai-indicator ms-2"></span>
         </h2>
-        <p class="text-muted small"> H&W Invest Intelectual Property</p>
+        <p class="text-muted small">H&W Invest Intellectual Property</p>
       </div>
     </div>
 
@@ -218,7 +314,7 @@
 
     <!-- Disclaimer -->
     <div class="mt-4 text-center text-muted small">
-      <p>trading suggestions for trading purposes  — Legal financial advice.</p>
+      <p>trading suggestions for trading purposes — Legal financial advice.</p>
     </div>
   </div>
 
@@ -273,6 +369,7 @@
         if (amount < 500) return 1;
         return Math.floor(amount / 250); // e.g., $5,500 / 250 = 22 trades
       },
+      // ... (rest of config remains unchanged)
       assetGroups: {
         commodities: ['Gold (XAU/USD)', 'Silver (XAG/USD)', 'Platinum (XPT/USD)', 'Palladium (XPD/USD)', 'Copper (COPPER)', 'Aluminum (AL)', 'Nickel (NI)', 'Zinc (ZN)', 'Lead (PB)', 'Tin (SN)', 'Uranium (U)', 'Crude Oil WTI (CL)', 'Crude Oil Brent (BRN)', 'Natural Gas (NG)', 'Heating Oil (HO)', 'Gasoline (RB)', 'Coal', 'Iron Ore (IO)', 'Steel', 'Lumber', 'Cotton', 'Sugar', 'Coffee', 'Cocoa', 'Wheat', 'Corn', 'Soybeans', 'Soybean Oil', 'Soybean Meal', 'Rice', 'Oats', 'Barley', 'Palm Oil', 'Rubber', 'Wool', 'Cottonseed', 'Orange Juice (OJ)', 'Cocoa Butter', 'Ethanol', 'Natural Gas Liquids (NGL)', 'Propane', 'Butane', 'LPG', 'Cocoa Beans', 'Cattle / Live Cattle', 'Lean Hogs', 'Feeder Cattle', 'Pork Bellies', 'Milk (Class III)', 'Sugar (Refined)'],
         indices: ['S&P 500 (US500)', 'NASDAQ 100 (NAS100)', 'Dow Jones Industrial Average (DJI)', 'Russell 2000 (RUT)', 'FTSE 100 (UK100)', 'DAX 40 (GER40)', 'CAC 40 (FRA40)', 'Nikkei 225 (JPN225)', 'Hang Seng (HK50)', 'Shanghai Composite (SHCOMP)', 'S&P/ASX 200 (AUS200)', 'NIFTY 50 (INDIA)', 'BSE Sensex (SENSEX)', 'TSX Composite (CANADA)', 'EURO STOXX 50 (EU50)', 'STOXX 600 (SX5E)', 'KOSPI (South Korea)', 'IBEX 35 (Spain)', 'CAC Next 20', 'BEL 20 (Belgium)', 'OMX Stockholm 30 (OMXS30)', 'AEX (Netherlands)', 'S&P 500 Equal Weight', 'S&P 100 (OEX)', 'MSCI World Index', 'MSCI Emerging Markets', 'MSCI EAFE', 'S&P MidCap 400', 'S&P SmallCap 600', 'Russell 3000', 'Dow Jones Transportation', 'Dow Jones Utilities', 'Dow Jones Financial', 'Dow Jones Technology', 'Dow Jones Industrial (again)', 'S&P Industrials', 'S&P Materials', 'S&P Financials', 'S&P Information Technology', 'S&P Consumer Discretionary', 'S&P Health Care', 'S&P Energy', 'S&P Utilities', 'S&P Real Estate', 'S&P Communication Services', 'FTSE MIB (Italy)', 'OMX Helsinki 25', 'PSI-20 (Portugal)', 'OMX Copenhagen 25', 'SMI (Switzerland)'],
@@ -605,14 +702,12 @@
               <p class="text-muted">Closing Type: ${sug.closingType}</p>
               <p class="text-muted">${sug.rationale}</p>
               <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm simulate-execute">Simulate Execute</button>
                 <button class="btn btn-primary btn-sm place-trade" data-suggestion='${JSON.stringify(sug)}'>Place Trade</button>
               </div>
               <canvas id="pl-chart-${i}" class="mt-2 mini-chart" width="100" height="50"></canvas>
             </div>
           `;
           suggestionsDiv.appendChild(card);
-          card.querySelector('.simulate-execute').addEventListener('click', () => simulatePL(`pl-chart-${i}`, sug.direction, parseFloat(sug.entry), parseFloat(sug.tp), parseFloat(sug.sl), sug.size));
           card.querySelector('.place-trade').addEventListener('click', () => showTradeConfirmation(sug));
           overallSummary += `Suggestion ${i+1}: Asset ${sug.asset}, Direction ${sug.direction}, Size ${sug.size}, Potential Profit $${sug.potentialProfit}\n`;
         }
