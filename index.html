@@ -381,16 +381,15 @@
     const config = {
       depositTiers: {
         250: 1,
-        5000: 20,
-        10000: 40,
-        25000: 100,
-        50000: 200,
+        5000: 5,
+        10000: 10,
+        25000: 25,
+        50000: 50,
       },
       customTier: (amount) => {
-        if (amount < 500) return 1;
-        return Math.floor(amount / 250); // e.g., $5,500 / 250 = 22 trades
+        if (amount >= 1000) return 2;
+        return 1;
       },
-      // ... (rest of config remains unchanged)
       assetGroups: {
         commodities: ['Gold (XAU/USD)', 'Silver (XAG/USD)', 'Platinum (XPT/USD)', 'Palladium (XPD/USD)', 'Copper (COPPER)', 'Aluminum (AL)', 'Nickel (NI)', 'Zinc (ZN)', 'Lead (PB)', 'Tin (SN)', 'Uranium (U)', 'Crude Oil WTI (CL)', 'Crude Oil Brent (BRN)', 'Natural Gas (NG)', 'Heating Oil (HO)', 'Gasoline (RB)', 'Coal', 'Iron Ore (IO)', 'Steel', 'Lumber', 'Cotton', 'Sugar', 'Coffee', 'Cocoa', 'Wheat', 'Corn', 'Soybeans', 'Soybean Oil', 'Soybean Meal', 'Rice', 'Oats', 'Barley', 'Palm Oil', 'Rubber', 'Wool', 'Cottonseed', 'Orange Juice (OJ)', 'Cocoa Butter', 'Ethanol', 'Natural Gas Liquids (NGL)', 'Propane', 'Butane', 'LPG', 'Cocoa Beans', 'Cattle / Live Cattle', 'Lean Hogs', 'Feeder Cattle', 'Pork Bellies', 'Milk (Class III)', 'Sugar (Refined)'],
         indices: ['S&P 500 (US500)', 'NASDAQ 100 (NAS100)', 'Dow Jones Industrial Average (DJI)', 'Russell 2000 (RUT)', 'FTSE 100 (UK100)', 'DAX 40 (GER40)', 'CAC 40 (FRA40)', 'Nikkei 225 (JPN225)', 'Hang Seng (HK50)', 'Shanghai Composite (SHCOMP)', 'S&P/ASX 200 (AUS200)', 'NIFTY 50 (INDIA)', 'BSE Sensex (SENSEX)', 'TSX Composite (CANADA)', 'EURO STOXX 50 (EU50)', 'STOXX 600 (SX5E)', 'KOSPI (South Korea)', 'IBEX 35 (Spain)', 'CAC Next 20', 'BEL 20 (Belgium)', 'OMX Stockholm 30 (OMXS30)', 'AEX (Netherlands)', 'S&P 500 Equal Weight', 'S&P 100 (OEX)', 'MSCI World Index', 'MSCI Emerging Markets', 'MSCI EAFE', 'S&P MidCap 400', 'S&P SmallCap 600', 'Russell 3000', 'Dow Jones Transportation', 'Dow Jones Utilities', 'Dow Jones Financial', 'Dow Jones Technology', 'Dow Jones Industrial (again)', 'S&P Industrials', 'S&P Materials', 'S&P Financials', 'S&P Information Technology', 'S&P Consumer Discretionary', 'S&P Health Care', 'S&P Energy', 'S&P Utilities', 'S&P Real Estate', 'S&P Communication Services', 'FTSE MIB (Italy)', 'OMX Helsinki 25', 'PSI-20 (Portugal)', 'OMX Copenhagen 25', 'SMI (Switzerland)'],
@@ -701,12 +700,12 @@
           }
         }
         updateWatchlist();
-        // Generate 5 suggestions
+        // Generate suggestions based on currentTierLimit
         const suggestionsDiv = document.getElementById('suggestions');
         const assetClassName = assetClass.charAt(0).toUpperCase() + assetClass.slice(1).replace('_', ' & ');
         suggestionsDiv.innerHTML = `<h4 class="small fw-semibold mb-3">AI Trading Suggestions for ${assetClassName} (Near-term 5 min)</h4>`;
         let overallSummary = 'Overall Summary:\n';
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < currentTierLimit; i++) {
           const sug = generateSuggestion(assetClass);
           const card = document.createElement('div');
           card.classList.add('card', 'mb-2', 'suggestion-card');
@@ -732,7 +731,7 @@
           card.querySelector('.place-trade').addEventListener('click', () => showTradeConfirmation(sug));
           overallSummary += `Suggestion ${i+1}: Asset ${sug.asset}, Direction ${sug.direction}, Size ${sug.size}, Potential Profit $${sug.potentialProfit}\n`;
         }
-        logActivity('AI analysis completed with 5 suggestions.');
+        logActivity(`AI analysis completed with ${currentTierLimit} suggestions.`);
         logActivity(overallSummary);
       }, config.analysisDelay);
     });
