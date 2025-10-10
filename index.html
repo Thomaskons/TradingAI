@@ -229,6 +229,47 @@
       border-color: #555555;
       color: #f0f0f0;
     }
+    /* Error Modal Styles */
+    .modal-content {
+      background-color: #ffffff; /* White background for light mode */
+      color: #212529; /* Dark text for light mode */
+      border-radius: 8px;
+    }
+    body.dark .modal-content {
+      background-color: #2a2a2a; /* Dark background for dark mode */
+      color: #f8f9fa; /* Light text for dark mode */
+    }
+    .modal-header {
+      border-bottom: 1px solid #e0e0e0; /* Light border for light mode */
+    }
+    body.dark .modal-header {
+      border-bottom: 1px solid #444444; /* Dark border for dark mode */
+    }
+    .modal-footer {
+      border-top: 1px solid #e0e0e0; /* Light border for light mode */
+    }
+    body.dark .modal-footer {
+      border-top: 1px solid #444444; /* Dark border for dark mode */
+    }
+    .modal-title {
+      color: #212529; /* Dark text for light mode */
+    }
+    body.dark .modal-title {
+      color: #f8f9fa; /* Light text for dark mode */
+    }
+    .modal-body p {
+      color: #212529; /* Dark text for light mode */
+    }
+    body.dark .modal-body p {
+      color: #f8f9fa; /* Light text for dark mode */
+    }
+    .btn-close {
+      background-color: transparent;
+      filter: none; /* Ensure visibility */
+    }
+    body.dark .btn-close {
+      filter: invert(1); /* Invert for visibility in dark mode */
+    }
   </style>
 </head>
 <body class="dark" onload="loadTheme()">
@@ -412,8 +453,7 @@
         50000: 50,
       },
       customTier: (amount) => {
-        if (amount >= 1000) return 2;
-        return 1;
+        return Math.floor(amount / 1000); // Number of AI trades is amount divided by 1000
       },
       assetGroups: {
         commodities: ['Gold (XAU/USD)', 'Silver (XAG/USD)', 'Platinum (XPT/USD)', 'Palladium (XPD/USD)', 'Copper (COPPER)', 'Aluminum (AL)', 'Nickel (NI)', 'Zinc (ZN)', 'Lead (PB)', 'Tin (SN)', 'Uranium (U)', 'Crude Oil WTI (CL)', 'Crude Oil Brent (BRN)', 'Natural Gas (NG)', 'Heating Oil (HO)', 'Gasoline (RB)', 'Coal', 'Iron Ore (IO)', 'Steel', 'Lumber', 'Cotton', 'Sugar', 'Coffee', 'Cocoa', 'Wheat', 'Corn', 'Soybeans', 'Soybean Oil', 'Soybean Meal', 'Rice', 'Oats', 'Barley', 'Palm Oil', 'Rubber', 'Wool', 'Cottonseed', 'Orange Juice (OJ)', 'Cocoa Butter', 'Ethanol', 'Natural Gas Liquids (NGL)', 'Propane', 'Butane', 'LPG', 'Cocoa Beans', 'Cattle / Live Cattle', 'Lean Hogs', 'Feeder Cattle', 'Pork Bellies', 'Milk (Class III)', 'Sugar (Refined)'],
