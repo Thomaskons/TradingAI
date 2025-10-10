@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading AI Simulator</title>
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1620325867502-2216c5f8a7e8');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .ai-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #0d6efd;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+    }
+    .progress-bar-custom {
+      background: linear-gradient(90deg, #0d6efd 0%, #60a5fa 100%);
+      height: 8px;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .mini-chart {
+      height: 50px !important;
+      width: 100px !important;
+    }
+    .suggestion-card {
+      border-left: 4px solid #0d6efd;
+      transition: transform 0.2s;
+    }
+    .suggestion-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .suggestion-card .card-body {
+      padding: 1rem;
+    }
+    .suggestion-card .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .suggestion-card p {
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #f8f9fa;
+    }
+    .dark .card {
+      background-color: #212529;
+      border-color: #343a40;
+    }
+    .dark .text-muted {
+      color: #adb5bd !important;
+    }
+    .dark .bg-light {
+      background-color: #343a40 !important;
+    }
+    .dark .btn-outline-secondary {
+      border-color: #495057;
+      color: #f8f9fa;
+    }
+    .dark .form-control {
+      background-color: #343a40;
+      border-color: #495057;
+      color: #f8f9fa;
+    }
+    .dark .form-select {
+      background-color: #343a40;
+      border-color: #495057;
+      color: #f8f9fa;
+    }
+    .dark .suggestion-card {
+      border-left-color: #60a5fa;
+    }
+  </style>
+</head>
+<body class="dark" onload="loadTheme()">
+  <div class="container my-5">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="h3">Trading AI Simulator</h1>
+        <p class="text-muted small">University Demo - Simulated AI Trading</p>
+      </div>
+      <div class="d-flex align-items-center mt-3 mt-sm-0">
+        <button id="toggleMode" class="btn btn-sm btn-outline-secondary">Switch to Day Mode</button>
+      </div>
+    </div>
+
+    <!-- AI Mode Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2 class="h5 d-flex align-items-center">
+          AI Mode <span class="ai-indicator ms-2"></span>
+        </h2>
+        <p class="text-muted small">Simulated AI-driven trading suggestions for educational purposes.</p>
+      </div>
+    </div>
+
+    <!-- Account and Client Info Card -->
+    <div class="card mb-4 bg-gradient bg-light">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-4">Account & Client Information</h2>
+        <div class="row">
+          <!-- Account Deposit -->
+          <div class="col-md-6">
+            <h3 class="h6 fw-semibold mb-3">Account Deposit</h3>
+            <p class="text-muted small mb-3">Select a deposit tier to unlock AI trading limits.</p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button class="btn btn-outline-secondary btn-sm option-btn" data-amount="250">$250</button>
+              <button class="btn btn-outline-secondary btn-sm option-btn" data-amount="5000">$5,000</button>
+              <button class="btn btn-outline-secondary btn-sm option-btn" data-amount="5500">$5,500</button>
+              <button class="btn btn-outline-secondary btn-sm option-btn" data-amount="10000">$10,000</button>
+              <button class="btn btn-outline-secondary btn-sm option-btn" data-amount="25000">$25,000</button>
+              <button class="btn btn-outline-secondary btn-sm option-btn" data-amount="50000">$50,000</button>
+            </div>
+            <div class="d-flex gap-2">
+              <input type="number" id="custom-deposit" class="form-control form-control-sm flex-grow-1" placeholder="Custom Amount" min="1">
+              <button id="custom-deposit-btn" class="btn btn-outline-secondary btn-sm">Set Custom</button>
+            </div>
+            <p class="mt-3 small fw-medium">Current Tier: <span id="current-tier">None</span></p>
+            <div class="mt-3">
+              <p class="small fw-medium">AI Analyses Used/Remaining: <span id="rate-limit">0/0</span></p>
+              <div class="progress" style="height: 8px;">
+                <div id="progress-bar" class="progress-bar progress-bar-custom" style="width: 0%"></div>
+              </div>
+              <p class="text-muted small mt-1"><span id="rate-limit-text">0 of 0 analyses used</span></p>
+            </div>
+          </div>
+          <!-- Client Information -->
+          <div class="col-md-6 mt-4 mt-md-0">
+            <h3 class="h6 fw-semibold mb-3">Client Information</h3>
+            <p class="fw-semibold">Name: Thomas Webber</p>
+            <p>Email: thomas.webber@example.com</p>
+            <p>Account Number: 123456789</p>
+            <p>Balance: <span id="client-balance">$0 (Simulated)</span></p>
+            <p>Credentials: Verified Trader, PhD in Finance</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="row">
+      <!-- Left: Order Entry -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-3">Order Entry</h3>
+            <div class="mb-3">
+              <label for="asset-class" class="form-label small fw-medium">Asset Class</label>
+              <select id="asset-class" class="form-select form-select-sm">
+                <option value="">Select Class</option>
+                <option value="commodities">Commodities</option>
+                <option value="indices">Indices</option>
+                <option value="forex">Forex</option>
+                <option value="stocks">Shares / Stocks</option>
+                <option value="crypto">Cryptocurrencies</option>
+                <option value="etfs_bonds">ETFs & Bonds</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="order-size" class="form-label small fw-medium">Size ($ or quantity) - Max 20% of Deposit</label>
+              <div class="input-group input-group-sm">
+                <input type="number" id="order-size" class="form-control" placeholder="Size" min="0" step="0.01">
+                <button id="max-size-btn" class="btn btn-outline-primary">Max</button>
+              </div>
+            </div>
+            <div class="form-check mb-3">
+              <input type="checkbox" id="ai-mode" class="form-check-input" checked>
+              <label for="ai-mode" class="form-check-label small">AI Mode</label>
+            </div>
+            <button id="analyse-btn" class="btn btn-primary btn-sm w-100 w-sm-auto">Analyse Market</button>
+            <div id="analysis-progress" class="mt-3 d-none">
+              <p class="text-muted small">AI Analysis in progress... Estimated brief analysis: ~5 minutes — simulated for demo.</p>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-primary animate-pulse" style="width: 100%"></div>
+              </div>
+            </div>
+            <div id="suggestions" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Watchlist and Activity Log -->
+      <div class="col-lg-6 mt-4 mt-lg-0">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-3">Asset Watchlist</h3>
+            <div id="watchlist" class="row"></div>
+          </div>
+        </div>
+        <div class="card mt-4">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-3">Activity Log</h3>
+            <div id="activity-log" class="text-muted small overflow-auto" style="max-height: 15rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disclaimer -->
+    <div class="mt-4 text-center text-muted small">
+      <p>This demo simulates AI trading suggestions for educational purposes only — not financial advice.</p>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="modal fade" id="error-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Error</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="error-message"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trade Confirmation Modal -->
+  <div class="modal fade" id="trade-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Trade Confirmation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="trade-message" class="small"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration object
+    const config = {
+      depositTiers: {
+        250: 1,
+        5000: 20,
+        5500: 22, // Explicitly defined for $5,500
+        10000: 40,
+        25000: 100,
+        50000: 200,
+      },
+      customTier: (amount) => {
+        if (amount < 500) return 1;
+        return Math.floor(amount / 250); // e.g., $5,500 / 250 = 22 trades
+      },
+      assetGroups: {
+        commodities: ['Gold (XAU/USD)', 'Silver (XAG/USD)', 'Platinum (XPT/USD)', 'Palladium (XPD/USD)', 'Copper (COPPER)', 'Aluminum (AL)', 'Nickel (NI)', 'Zinc (ZN)', 'Lead (PB)', 'Tin (SN)', 'Uranium (U)', 'Crude Oil WTI (CL)', 'Crude Oil Brent (BRN)', 'Natural Gas (NG)', 'Heating Oil (HO)', 'Gasoline (RB)', 'Coal', 'Iron Ore (IO)', 'Steel', 'Lumber', 'Cotton', 'Sugar', 'Coffee', 'Cocoa', 'Wheat', 'Corn', 'Soybeans', 'Soybean Oil', 'Soybean Meal', 'Rice', 'Oats', 'Barley', 'Palm Oil', 'Rubber', 'Wool', 'Cottonseed', 'Orange Juice (OJ)', 'Cocoa Butter', 'Ethanol', 'Natural Gas Liquids (NGL)', 'Propane', 'Butane', 'LPG', 'Cocoa Beans', 'Cattle / Live Cattle', 'Lean Hogs', 'Feeder Cattle', 'Pork Bellies', 'Milk (Class III)', 'Sugar (Refined)'],
+        indices: ['S&P 500 (US500)', 'NASDAQ 100 (NAS100)', 'Dow Jones Industrial Average (DJI)', 'Russell 2000 (RUT)', 'FTSE 100 (UK100)', 'DAX 40 (GER40)', 'CAC 40 (FRA40)', 'Nikkei 225 (JPN225)', 'Hang Seng (HK50)', 'Shanghai Composite (SHCOMP)', 'S&P/ASX 200 (AUS200)', 'NIFTY 50 (INDIA)', 'BSE Sensex (SENSEX)', 'TSX Composite (CANADA)', 'EURO STOXX 50 (EU50)', 'STOXX 600 (SX5E)', 'KOSPI (South Korea)', 'IBEX 35 (Spain)', 'CAC Next 20', 'BEL 20 (Belgium)', 'OMX Stockholm 30 (OMXS30)', 'AEX (Netherlands)', 'S&P 500 Equal Weight', 'S&P 100 (OEX)', 'MSCI World Index', 'MSCI Emerging Markets', 'MSCI EAFE', 'S&P MidCap 400', 'S&P SmallCap 600', 'Russell 3000', 'Dow Jones Transportation', 'Dow Jones Utilities', 'Dow Jones Financial', 'Dow Jones Technology', 'Dow Jones Industrial (again)', 'S&P Industrials', 'S&P Materials', 'S&P Financials', 'S&P Information Technology', 'S&P Consumer Discretionary', 'S&P Health Care', 'S&P Energy', 'S&P Utilities', 'S&P Real Estate', 'S&P Communication Services', 'FTSE MIB (Italy)', 'OMX Helsinki 25', 'PSI-20 (Portugal)', 'OMX Copenhagen 25', 'SMI (Switzerland)'],
+        forex: ['EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 'AUD/USD', 'USD/CAD', 'NZD/USD', 'EUR/GBP', 'EUR/JPY', 'GBP/JPY', 'EUR/CHF', 'AUD/JPY', 'GBP/CHF', 'NZD/JPY', 'AUD/GBP', 'EUR/AUD', 'EUR/CAD', 'CAD/JPY', 'USD/SGD', 'USD/HKD', 'USD/INR', 'USD/BRL', 'USD/MXN', 'USD/ZAR', 'USD/SEK', 'USD/NOK', 'USD/DKK', 'USD/PLN', 'EUR/SEK', 'EUR/NOK', 'GBP/AUD', 'AUD/CHF', 'AUD/NZD', 'CHF/JPY', 'EUR/MXN', 'EUR/TRY', 'USD/TRY', 'GBP/TRY', 'AUD/TRY', 'NZD/CHF', 'CAD/CHF', 'NZD/CAD', 'CHF/SGD', 'EUR/SGD', 'GBP/SGD', 'AUD/SGD', 'NZD/SGD', 'USD/CNH', 'USD/CNY', 'EUR/CNY'],
+        stocks: ['Apple (AAPL)', 'Microsoft (MSFT)', 'Amazon (AMZN)', 'Alphabet / Google (GOOGL)', 'Meta (META)', 'Tesla (TSLA)', 'Nvidia (NVDA)', 'Berkshire Hathaway (BRK.B)', 'JPMorgan Chase (JPM)', 'Johnson & Johnson (JNJ)', 'Visa (V)', 'UnitedHealth (UNH)', 'Procter & Gamble (PG)', 'Mastercard (MA)', 'Home Depot (HD)', 'Walt Disney (DIS)', 'PayPal (PYPL)', 'Adobe (ADBE)', 'Netflix (NFLX)', 'Intel (INTC)', 'Cisco (CSCO)', 'Pfizer (PFE)', 'Coca-Cola (KO)', 'Pepsico (PEP)', 'Chevron (CVX)', 'ExxonMobil (XOM)', 'McDonald’s (MCD)', 'Nike (NKE)', 'IBM (IBM)', 'Oracle (ORCL)', 'Salesforce (CRM)', 'Broadcom (AVGO)', 'ASML (ASML)', 'SAP (SAP)', 'Sony (SONY)', 'Toyota (TM)', 'Samsung (005930.KS)', 'Tencent (0700.HK)', 'Alibaba (BABA)', 'TSMC (TSM)', 'SoftBank (9984.T)', 'LVMH (MC.PA)', 'Nestlé (NESN)', 'Roche (ROG)', 'Novartis (NOVN)', 'BP plc (BP)', 'Royal Dutch Shell (RDS.A)', 'Unilever (ULVR)', 'Siemens (SIE)', 'Volkswagen (VOW)'],
+        crypto: ['Bitcoin (BTC)', 'Ethereum (ETH)', 'Binance Coin (BNB)', 'Solana (SOL)', 'XRP (XRP)', 'Cardano (ADA)', 'Dogecoin (DOGE)', 'Polkadot (DOT)', 'Avalanche (AVAX)', 'Shiba Inu (SHIB)', 'Polygon (MATIC)', 'Chainlink (LINK)', 'Litecoin (LTC)', 'Stellar (XLM)', 'Internet Computer (ICP)', 'VeChain (VET)', 'TRON (TRX)', 'Cosmos (ATOM)', 'Algorand (ALGO)', 'Filecoin (FIL)', 'Tezos (XTZ)', 'Aave (AAVE)', 'Uniswap (UNI)', 'Sushiswap (SUSHI)', 'Theta (THETA)', 'Elrond (EGLD)', 'EOS (EOS)', 'Hedera (HBAR)', 'Terra (LUNA)', 'Harmony (ONE)', 'Zcash (ZEC)', 'Monero (XMR)', 'IOTA (MIOTA)', 'Dash (DASH)', 'Neo (NEO)', 'Sushi (SUSHI)', 'PancakeSwap (CAKE)', 'Theta Fuel (TFUEL)', 'Enjin (ENJ)', 'Helium (HNT)', 'Chiliz (CHZ)', 'Decentraland (MANA)', 'Axie Infinity (AXS)', 'The Graph (GRT)', 'Compound (COMP)', 'Maker (MKR)', 'Avalanche (AVAX)', 'Fantom (FTM)', 'Sushi', 'Near (NEAR)'],
+        etfs_bonds: ['SPDR S&P 500 ETF (SPY)', 'Invesco QQQ Trust (QQQ)', 'iShares Russell 2000 ETF (IWM)', 'iShares MSCI Emerging Markets (EEM)', 'Vanguard Total Stock Market ETF (VTI)', 'Vanguard FTSE Developed Markets ETF (VEA)', 'Vanguard FTSE Emerging Markets ETF (VWO)', 'iShares MSCI EAFE (EFA)', 'iShares Core U.S. Aggregate Bond ETF (AGG)', 'Vanguard Total Bond Market ETF (BND)', 'iShares iBoxx USD Corporate Bond ETF (LQD)', 'iShares 20+ Year Treasury Bond ETF (TLT)', 'iShares 7-10 Year Treasury ETF (IEF)', 'iShares TIPS Bond ETF (TIP)', 'Vanguard Short-Term Treasury ETF (VGSH)', 'Schwab U.S. Dividend Equity ETF (SCHD)', 'Vanguard Real Estate ETF (VNQ)', 'iShares Global REIT ETF (REET)', 'iShares MSCI ACWI ETF (ACWI)', 'iShares MSCI World ETF (URTH)', 'SPDR Gold Shares (GLD)', 'iShares Silver Trust (SLV)', 'Invesco DB Commodity Index Tracking (DBC)', 'iShares Global Clean Energy ETF (ICLN)', 'ARK Innovation ETF (ARKK)', 'iShares Cybersecurity ETF (HACK)', 'Global X Robotics & AI ETF (BOTZ)', 'iShares Global Infrastructure ETF (IGF)', 'Invesco Water Resources ETF (PHO)', 'iShares U.S. Financials ETF (IYF)', 'iShares U.S. Technology ETF (IYW)', 'iShares U.S. Healthcare ETF (IYH)', 'iShares U.S. Energy ETF (IYE)', 'iShares U.S. Industrial ETF (IYJ)', 'iShares U.S. Consumer Discretionary ETF (IYC)', 'iShares U.S. Consumer Staples ETF (IYK)', 'iShares U.S. Communications ETF (IYZ)', 'iShares U.S. Materials ETF (IYM)', 'iShares U.S. Utilities ETF (IDU)', 'iShares U.S. REIT ETF (IYR)', 'SPDR S&P Dividend ETF (SDY)', 'Vanguard Dividend Appreciation ETF (VIG)', 'iShares Core MSCI Total International Stock ETF (IXUS)', 'Vanguard High Dividend Yield ETF (VYM)', 'iShares U.S. Treasury Bond ETF (GOVT)', 'iShares U.S. Treasury Inflation-Protected Securities ETF (TIP)', 'VanEck Vectors Semiconductor ETF (SMH)', 'iShares Semiconductor ETF (SOXX)', 'Global X Nasdaq 100 Covered Call ETF (QYLD)', 'iShares ESG Aware MSCI International ETF (ESGD)']
+      },
+      assetWeights: {
+        'BTC': 10,
+        'ETH': 10,
+        'GOOGL': 8,
+        'NVDA': 8,
+        'XAU/USD': 6,
+        'EUR/USD': 6,
+        'SN': 5, // Added for Tin
+      },
+      suggestionTemplates: [
+        'Based on recent market volatility.',
+        'According to technical indicators.',
+        'From fundamental analysis.',
+        'Considering current news events.',
+        'Based on historical patterns.',
+      ],
+      closingTypes: ['Take Profit', 'Stop Loss', 'Trailing Stop', 'Time-based Close'],
+      analysisDelay: 5000, // ms, demo delay
+      seed: 12345, // RNG seed for reproducibility
+    };
+
+    // Define assetUniverse
+    config.assetUniverse = Object.values(config.assetGroups).flat().map(a => {
+      if (a.includes('/')) return a; // Forex pairs
+      return a.split(' (')[0]; // Clean symbols
+    });
+
+    // Seeded RNG
+    function createSeededRandom(seed) {
+      return function() {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      };
+    }
+    const random = createSeededRandom(config.seed);
+
+    // Asset icons
+    const assetIcons = {
+      commodities: '<svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="10" width="16" height="8" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 6H16V10H8V6Z" stroke="currentColor" stroke-width="2"/></svg>',
+      indices: '<svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18M3 12h18M3 19h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      forex: '<svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M18 12L14 8M18 12L14 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18 12H6M6 12L10 8M6 12L10 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      stocks: '<svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 18L7 14L11 18L15 12L19 16L21 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6H21" stroke="currentColor" stroke-width="2"/></svg>',
+      crypto: '<svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M9 6v12M15 6v12M12 6v12" stroke="currentColor" stroke-width="2"/></svg>',
+      etfs_bonds: '<svg class="me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 5h18M3 12h18M3 19h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    };
+
+    // Get asset class
+    function getAssetClass(asset) {
+      for (const [assetClass, assets] of Object.entries(config.assetGroups)) {
+        if (assets.some(a => a.includes(asset))) {
+          return assetClass;
+        }
+      }
+      return 'crypto'; // Default
+    }
+
+    // State variables
+    let currentDeposit = 0;
+    let currentTierLimit = 0;
+    let analysesUsed = 0;
+    let lastReset = Date.now();
+    let prices = {};
+    let watchlistAssets = [];
+    let selectedAssetClass = '';
+
+    // Initialize prices
+    config.assetUniverse.forEach(asset => {
+      prices[asset] = Math.floor(random() * 10000) + 100;
+    });
+    // Override for Tin to match example
+    prices['SN'] = 3386.68;
+
+    // Weighted random asset from selected asset class
+    function weightedRandomAsset(assetClass) {
+      const assets = config.assetGroups[assetClass] ? config.assetGroups[assetClass].map(a => a.includes('/') ? a : a.split(' (')[0]) : config.assetUniverse;
+      const weights = assets.map(a => config.assetWeights[a] || 1);
+      const total = weights.reduce((sum, w) => sum + w, 0);
+      let r = random() * total;
+      for (let i = 0; i < assets.length; i++) {
+        r -= weights[i];
+        if (r <= 0) return assets[i];
+      }
+      return assets[Math.floor(random() * assets.length)];
+    }
+
+    // Generate open time
+    function generateOpenTime() {
+      const minutes = Math.floor(random() * 60) + 1;
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + minutes);
+      return now.toLocaleTimeString();
+    }
+
+    // Generate suggestion
+    function generateSuggestion(assetClass) {
+      const asset = weightedRandomAsset(assetClass);
+      const direction = random() > 0.5 ? 'Buy' : 'Sell';
+      const maxSize = currentDeposit * 0.2;
+      const size = Math.min(Math.floor(random() * maxSize) + 10, maxSize);
+      const entry = prices[asset];
+      const sl = direction === 'Buy' ? entry * (1 - (random() * 0.03 + 0.01)) : entry * (1 + (random() * 0.03 + 0.01)); // 1-4% SL
+      const profitPercentage = random() * 0.10 + 0.05; // 5% to 15%
+      const tp = direction === 'Buy' ? entry * (1 + profitPercentage) : entry * (1 - profitPercentage); // TP is Entry ± 5-15%
+      const confidence = Math.floor(random() * 40) + 60; // 60% to 99%
+      const rationale = config.suggestionTemplates[Math.floor(random() * config.suggestionTemplates.length)];
+      // Leverage: 1:2 (50%), 1:4 (30%), 1:6 to 1:10 (20%)
+      let leverage;
+      const rand = random();
+      if (rand < 0.5) {
+        leverage = 2; // 1:2
+      } else if (rand < 0.8) {
+        leverage = 4; // 1:4
+      } else {
+        leverage = Math.floor(6 + random() * 5); // 1:6 to 1:10
+      }
+      const potentialProfit = size + (size * profitPercentage); // Size + 5-15% of Size
+      const openTime = generateOpenTime();
+      const closingType = config.closingTypes[Math.floor(random() * config.closingTypes.length)];
+      return {
+        asset,
+        direction,
+        size,
+        entry: entry.toFixed(2),
+        sl: sl.toFixed(2),
+        tp: tp.toFixed(2),
+        confidence,
+        rationale,
+        potentialProfit: potentialProfit.toFixed(2),
+        openTime,
+        closingType,
+        leverage: `${leverage}x`
+      };
+    }
+
+    // Theme handling
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.body.classList.toggle('dark', savedTheme === 'dark');
+      document.getElementById('toggleMode').textContent = savedTheme === 'dark' ? 'Switch to Day Mode' : 'Switch to Night Mode';
+    }
+
+    document.getElementById('toggleMode').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.getElementById('toggleMode').textContent = isDark ? 'Switch to Day Mode' : 'Switch to Night Mode';
+    });
+
+    // Max size button
+    document.getElementById('max-size-btn').addEventListener('click', () => {
+      if (currentDeposit > 0) {
+        document.getElementById('order-size').value = (currentDeposit * 0.2).toFixed(2);
+      } else {
+        showError('Select a deposit amount first.');
+      }
+    });
+
+    // Order size restriction
+    document.getElementById('order-size').addEventListener('input', (e) => {
+      const maxSize = currentDeposit * 0.2;
+      const value = parseFloat(e.target.value);
+      if (value > maxSize) {
+        e.target.value = maxSize.toFixed(2);
+      } else if (value < 0 || isNaN(value)) {
+        e.target.value = '';
+      }
+    });
+
+    // Update tier
+    function updateTier(amount) {
+      currentDeposit = amount;
+      currentTierLimit = config.depositTiers[amount] || config.customTier(amount);
+      document.getElementById('current-tier').textContent = `$${amount.toLocaleString()} - ${currentTierLimit} AI trades/24h`;
+      document.getElementById('client-balance').textContent = `$${amount.toLocaleString()} (Simulated)`;
+      updateRateLimit();
+      updateWatchlist();
+    }
+
+    // Update rate limit
+    function updateRateLimit() {
+      document.getElementById('rate-limit').textContent = `${analysesUsed}/${currentTierLimit}`;
+      document.getElementById('rate-limit-text').textContent = `${analysesUsed} of ${currentTierLimit} analyses used`;
+      document.getElementById('progress-bar').style.width = `${currentTierLimit ? (analysesUsed / currentTierLimit) * 100 : 0}%`;
+    }
+
+    // Can analyse check
+    function canAnalyse() {
+      const now = Date.now();
+      if (now - lastReset > 86400000) {
+        analysesUsed = 0;
+        lastReset = now;
+      }
+      return analysesUsed < currentTierLimit;
+    }
+
+    // Log activity
+    function logActivity(message) {
+      const log = document.getElementById('activity-log');
+      const item = document.createElement('div');
+      item.classList.add('mb-2');
+      item.textContent = new Date().toLocaleString() + ': ' + message;
+      log.prepend(item);
+      if (log.children.length > 10) log.removeChild(log.lastChild);
+    }
+
+    // Show error
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
+      new bootstrap.Modal(document.getElementById('error-modal')).show();
+    }
+
+    // Show trade confirmation
+    function showTradeConfirmation(suggestion) {
+      const message = `
+        Trade Placed (Simulated):
+        Asset: ${suggestion.asset}
+        Direction: ${suggestion.direction}
+        Size: ${suggestion.size} (Leverage: ${suggestion.leverage})
+        Entry: $${suggestion.entry}
+        Stop Loss: $${suggestion.sl}
+        Take Profit: $${suggestion.tp}
+        Potential Profit: $${suggestion.potentialProfit}
+        Confidence: ${suggestion.confidence}%
+        Open Time: ${suggestion.openTime}
+        Closing Type: ${suggestion.closingType}
+        Rationale: ${suggestion.rationale}
+      `;
+      document.getElementById('trade-message').textContent = message;
+      new bootstrap.Modal(document.getElementById('trade-modal')).show();
+      logActivity(`Trade placed: ${suggestion.asset} - ${suggestion.direction}, Size: ${suggestion.size}`);
+    }
+
+    // Deposit buttons
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        updateTier(parseInt(btn.dataset.amount));
+        document.querySelectorAll('.option-btn').forEach(b => {
+          b.classList.remove('btn-primary');
+          b.classList.add('btn-outline-secondary');
+        });
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-outline-secondary');
+      });
+    });
+
+    // Custom deposit
+    document.getElementById('custom-deposit-btn').addEventListener('click', () => {
+      const amount = parseFloat(document.getElementById('custom-deposit').value);
+      if (isNaN(amount) || amount <= 0) {
+        showError('Please enter a valid positive deposit amount.');
+        return;
+      }
+      updateTier(amount);
+      document.querySelectorAll('.option-btn').forEach(b => {
+        b.classList.remove('btn-primary');
+        b.classList.add('btn-outline-secondary');
+      });
+    });
+
+    // Analyse button
+    document.getElementById('analyse-btn').addEventListener('click', () => {
+      if (currentDeposit === 0) {
+        showError('Please select a deposit amount.');
+        return;
+      }
+      if (!canAnalyse()) {
+        showError('AI trade limit exhausted for this tier. Upgrade deposit or wait 24 hours.');
+        return;
+      }
+      const orderSize = parseFloat(document.getElementById('order-size').value);
+      const maxSize = currentDeposit * 0.2;
+      if (isNaN(orderSize) || orderSize <= 0) {
+        showError('Please enter a valid order size.');
+        return;
+      }
+      if (orderSize > maxSize) {
+        showError('Order size cannot exceed 20% of deposit.');
+        return;
+      }
+      const assetClass = document.getElementById('asset-class').value;
+      if (!assetClass) {
+        showError('Please select an asset class.');
+        return;
+      }
+      selectedAssetClass = assetClass;
+      const progress = document.getElementById('analysis-progress');
+      progress.classList.remove('d-none');
+      logActivity('Started AI market analysis.');
+      setTimeout(() => {
+        progress.classList.add('d-none');
+        analysesUsed++;
+        updateRateLimit();
+        // Update watchlist with random assets from selected asset class
+        watchlistAssets = [];
+        const classAssets = config.assetGroups[assetClass].map(a => a.includes('/') ? a : a.split(' (')[0]);
+        for (let i = 0; i < Math.min(5, classAssets.length); i++) {
+          const randomAsset = classAssets[Math.floor(random() * classAssets.length)];
+          if (!watchlistAssets.includes(randomAsset)) {
+            watchlistAssets.push(randomAsset);
+          }
+        }
+        updateWatchlist();
+        // Generate 5 suggestions
+        const suggestionsDiv = document.getElementById('suggestions');
+        const assetClassName = assetClass.charAt(0).toUpperCase() + assetClass.slice(1).replace('_', ' & ');
+        suggestionsDiv.innerHTML = `<h4 class="small fw-semibold mb-3">AI Trading Suggestions for ${assetClassName} (Near-term 5 min)</h4>`;
+        let overallSummary = 'Overall Summary:\n';
+        for (let i = 0; i < 5; i++) {
+          const sug = generateSuggestion(assetClass);
+          const card = document.createElement('div');
+          card.classList.add('card', 'mb-2', 'suggestion-card');
+          card.innerHTML = `
+            <div class="card-body small">
+              <h5 class="card-title small">${sug.asset} - ${sug.direction}</h5>
+              <p class="text-muted">Size: ${sug.size} (Leverage: ${sug.leverage})</p>
+              <p class="text-muted">Entry: $${Number(sug.entry).toLocaleString()}</p>
+              <p class="text-muted">Stop Loss: $${Number(sug.sl).toLocaleString()}</p>
+              <p class="text-muted">Take Profit: $${Number(sug.tp).toLocaleString()}</p>
+              <p class="text-muted">Confidence: ${sug.confidence}%</p>
+              <p class="text-muted">Potential Profit: $${Number(sug.potentialProfit).toLocaleString()}</p>
+              <p class="text-muted">Open Time: ${sug.openTime}</p>
+              <p class="text-muted">Closing Type: ${sug.closingType}</p>
+              <p class="text-muted">${sug.rationale}</p>
+              <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm simulate-execute">Simulate Execute</button>
+                <button class="btn btn-primary btn-sm place-trade" data-suggestion='${JSON.stringify(sug)}'>Place Trade</button>
+              </div>
+              <canvas id="pl-chart-${i}" class="mt-2 mini-chart" width="100" height="50"></canvas>
+            </div>
+          `;
+          suggestionsDiv.appendChild(card);
+          card.querySelector('.simulate-execute').addEventListener('click', () => simulatePL(`pl-chart-${i}`, sug.direction, parseFloat(sug.entry), parseFloat(sug.tp), parseFloat(sug.sl), sug.size));
+          card.querySelector('.place-trade').addEventListener('click', () => showTradeConfirmation(sug));
+          overallSummary += `Suggestion ${i+1}: Asset ${sug.asset}, Direction ${sug.direction}, Size ${sug.size}, Potential Profit $${sug.potentialProfit}\n`;
+        }
+        logActivity('AI analysis completed with 5 suggestions.');
+        logActivity(overallSummary);
+      }, config.analysisDelay);
+    });
+
+    // Simulate P&L chart
+    function simulatePL(canvasId, direction, entry, tp, sl, size) {
+      const canvas = document.getElementById(canvasId);
+      canvas.width = 100;
+      canvas.height = 50;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      let y = canvas.height / 2;
+      let currentPrice = entry;
+      const interval = setInterval(() => {
+        currentPrice += (random() - 0.5) * 10;
+        y = canvas.height / 2 - (currentPrice - entry) * 2;
+        y = Math.max(0, Math.min(canvas.height, y));
+        ctx.lineTo(canvas.width * (Date.now() % 1000 / 1000), y);
+        ctx.strokeStyle = y < canvas.height / 2 ? '#198754' : '#dc3545';
+        ctx.stroke();
+        const profit = direction === 'Buy' ? (currentPrice - entry) * size : (entry - currentPrice) * size;
+        ctx.fillStyle = '#6c757d';
+        ctx.font = '10px Arial';
+        ctx.fillText(`$${profit.toFixed(2)}`, canvas.width - 50, 10);
+      }, 500);
+      setTimeout(() => clearInterval(interval), 5000);
+    }
+
+    // Update prices
+    function updatePrices() {
+      config.assetUniverse.forEach(asset => {
+        prices[asset] += (random() - 0.5) * 10;
+        prices[asset] = Math.max(1, prices[asset]);
+      });
+      updateWatchlist();
+    }
+
+    // Update watchlist
+    function updateWatchlist() {
+      const watchlist = document.getElementById('watchlist');
+      watchlist.innerHTML = '';
+      if (watchlistAssets.length === 0) {
+        watchlist.innerHTML = '<p class="text-muted small">Select an asset class and analyze to populate watchlist.</p>';
+        return;
+      }
+      watchlistAssets.forEach(asset => {
+        const direction = random() > 0.5 ? 'Buy' : 'Sell';
+        const entry = prices[asset];
+        const size = currentDeposit * 0.15;
+        const priceChange = (random() - 0.5) * 0.1 * entry;
+        const predictedPrice = entry + priceChange;
+        const profit = direction === 'Buy' ? (predictedPrice - entry) * size : (entry - predictedPrice) * size;
+        const col = document.createElement('div');
+        col.classList.add('col-12', 'col-sm-6');
+        const card = document.createElement('div');
+        card.classList.add('card', 'mb-2');
+        card.innerHTML = `
+          <div class="card-body small d-flex justify-content-between align-items-center">
+            <div>
+              <span>${assetIcons[getAssetClass(asset)]}${asset}: $${prices[asset].toFixed(2)}</span>
+              <p class="text-muted">Prediction: ${direction} @ $${predictedPrice.toFixed(2)}</p>
+              <p class="text-muted">Potential Profit: $${profit.toFixed(2)}</p>
+            </div>
+            <canvas class="mini-chart" width="100" height="50"></canvas>
+          </div>
+        `;
+        col.appendChild(card);
+        watchlist.appendChild(col);
+        drawMiniChart(card.querySelector('.mini-chart'), entry, predictedPrice, direction);
+      });
+    }
+
+    // Draw mini chart
+    function drawMiniChart(canvas, entry, predictedPrice, direction) {
+      canvas.width = 100;
+      canvas.height = 50;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      const steps = 10;
+      for (let x = 0; x <= canvas.width; x += canvas.width / steps) {
+        const t = x / canvas.width;
+        const price = entry + (predictedPrice - entry) * t;
+        const y = canvas.height / 2 - (price - entry) * 2;
+        ctx.lineTo(x, Math.max(0, Math.min(canvas.height, y)));
+      }
+      ctx.strokeStyle = direction === 'Buy' && predictedPrice > entry || direction === 'Sell' && predictedPrice < entry ? '#198754' : '#dc3545';
+      ctx.stroke();
+    }
+
+    // Initial setup
+    updateTier(5500); // Initialize with $5,500 deposit
+    updateWatchlist();
+    setInterval(updatePrices, 10000);
+  </script>
+</body>
+</html>
