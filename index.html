@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trading AI Simulator</title>
+  <title>Quantum Trading AI</title>
   <!-- Bootstrap 5 CDN -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -96,7 +96,7 @@
     <!-- Header -->
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4">
       <div>
-        <h1 class="h3">Trading AI Simulator</h1>
+        <h1 class="h3">Trading AI </h1>
         <p class="text-muted small">University Demo - Simulated AI Trading</p>
       </div>
       <div class="d-flex align-items-center mt-3 mt-sm-0">
@@ -110,7 +110,7 @@
         <h2 class="h5 d-flex align-items-center">
           AI Mode <span class="ai-indicator ms-2"></span>
         </h2>
-        <p class="text-muted small">Simulated AI-driven trading suggestions for educational purposes.</p>
+        <p class="text-muted small"> AI-driven trading suggestions for educational purposes.</p>
       </div>
     </div>
 
@@ -150,7 +150,7 @@
             <p class="fw-semibold">Name: Thomas Webber</p>
             <p>Email: thomas.webber@example.com</p>
             <p>Account Number: 123456789</p>
-            <p>Balance: <span id="client-balance">$0 (Simulated)</span></p>
+            <p>Balance: <span id="client-balance">$0</span></p>
             <p>Credentials: Verified Trader, PhD in Finance</p>
           </div>
         </div>
@@ -189,7 +189,7 @@
             </div>
             <button id="analyse-btn" class="btn btn-primary btn-sm w-100 w-sm-auto">Analyse Market</button>
             <div id="analysis-progress" class="mt-3 d-none">
-              <p class="text-muted small">AI Analysis in progress... Estimated brief analysis: ~5 minutes — simulated for demo.</p>
+              <p class="text-muted small">AI Analysis in progress... Estimated brief analysis: ~5 minutes</p>
               <div class="progress" style="height: 8px;">
                 <div class="progress-bar bg-primary animate-pulse" style="width: 100%"></div>
               </div>
@@ -218,7 +218,7 @@
 
     <!-- Disclaimer -->
     <div class="mt-4 text-center text-muted small">
-      <p>This demo simulates AI trading suggestions for educational purposes only — not financial advice.</p>
+      <p>trading suggestions for trading purposes  — Legal financial advice.</p>
     </div>
   </div>
 
@@ -495,7 +495,7 @@
     // Show trade confirmation
     function showTradeConfirmation(suggestion) {
       const message = `
-        Trade Placed (Simulated):
+        Trade Placed:
         Asset: ${suggestion.asset}
         Direction: ${suggestion.direction}
         Size: ${suggestion.size} (Leverage: ${suggestion.leverage})
