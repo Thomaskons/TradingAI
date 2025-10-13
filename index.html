@@ -415,7 +415,7 @@
             <p>Email: thomas.webber@example.com</p>
             <p>Account Number: 123456789</p>
             <p>Balance: <span id="client-balance">$0</span></p>
-            <p>Credentials: Verified Trader, PhD in Finance</p>
+            <p>Credentials: Verified Trader</p>
           </div>
         </div>
       </div>
@@ -714,7 +714,7 @@
       currentDeposit = amount;
       currentTierLimit = config.depositTiers[amount] || config.customTier(amount);
       document.getElementById('current-tier').textContent = `$${amount.toLocaleString()} - ${currentTierLimit} AI trades/24h`;
-      document.getElementById('client-balance').textContent = `$${amount.toLocaleString()} (Simulated)`;
+      document.getElementById('client-balance').textContent = `$${amount.toLocaleString()} ()`;
       updateRateLimit();
       updateWatchlist();
     }
