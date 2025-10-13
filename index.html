@@ -714,7 +714,7 @@
       currentDeposit = amount;
       currentTierLimit = config.depositTiers[amount] || config.customTier(amount);
       document.getElementById('current-tier').textContent = `$${amount.toLocaleString()} - ${currentTierLimit} AI trades/24h`;
-      document.getElementById('client-balance').textContent = `$${amount.toLocaleString()} ()`;
+      document.getElementById('client-balance').textContent = `$${amount.toLocaleString()}`;
       updateRateLimit();
       updateWatchlist();
     }
